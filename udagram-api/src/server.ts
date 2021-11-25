@@ -39,13 +39,18 @@ import {V0_FEED_MODELS, V0_USER_MODELS} from './controllers/v0/model.index';
 
   // Root URI call
   app.get( '/', async ( req, res ) => {
-    res.send( '/api/v0/' );
+    res.send( 'Nothing here.' );
   } );
+
+  // Health
+  app.get('/health', (req, res) => {
+    res.status(200).send({message: "App is healthy."})
+  })
 
 
   // Start the Server
   app.listen( port, () => {
-    console.log( `server running ${config.url}` );
+    console.log( `server running ${config.url}:${port}` );
     console.log( `press CTRL+C to stop server` );
   } );
 })();
