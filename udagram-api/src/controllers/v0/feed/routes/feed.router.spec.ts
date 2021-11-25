@@ -32,4 +32,14 @@ describe('feed router', () => {
       expect(result.data.id).toEqual(1)
     })
   })
+
+  describe('get signed-url/:filename', () => {
+    it('should return unauthorized when headers are missing',async () => {
+      const result = await axios.get(buildUrl('/signed-url/test.jpg'))
+        .catch(error => {
+          expect(error.response.status).toEqual(401)
+          expect(error.response.data.message).toEqual('No authorization headers.')
+        })
+    })
+  })
 })
