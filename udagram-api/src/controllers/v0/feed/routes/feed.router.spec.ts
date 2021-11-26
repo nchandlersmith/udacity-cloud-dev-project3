@@ -49,7 +49,7 @@ describe('feed router', () => {
       expect(result.response.data.message).toEqual('No authorization headers.')
     })
 
-    it('should return error malformed token when auth token not Bearer',async () => {
+    it('should return error malformed token when auth token malformed',async () => {
       const headers = {authorization: 'foo'}
       const result = await axios.get(buildUrl('/signed-url/test.jpg'), {headers})
         .catch(error => error)
@@ -70,6 +70,39 @@ describe('feed router', () => {
       const result = await axios.get(buildUrl('/signed-url/test.jpg'), {headers})
       expect(result.status).toEqual(201)
       expect(result.data.url).toContain('https://udagram-707863247739-dev.s3.amazonaws.com/test.jpg')
+    })
+  })
+
+  describe('post /', () => {
+    it('should return unauthorized when headers are missing',async () => {
+      const result = await axios.post(buildUrl('/'), {})
+        .catch(error => error)
+      expect(result.response.status).toEqual(401)
+      expect(result.response.data.message).toEqual('No authorization headers.')
+    })
+
+    it('should return unauthorized when authorization headers are empty',async () => {
+      const headers = {authorization: ''}
+      const result = await axios.post(buildUrl('/'), {}, {headers})
+        .catch(error => error)
+      expect(result.response.status).toEqual(401)
+      expect(result.response.data.message).toEqual('No authorization headers.')
+    })
+
+    it('should return error malformed token when auth token malformed',async () => {
+      const headers = {authorization: 'foo'}
+      const result = await axios.post(buildUrl('/'), {}, {headers})
+        .catch(error => error)
+      expect(result.response.status).toEqual(401)
+      expect(result.response.data.message).toEqual('Malformed token.')
+    })
+
+    it('should return server error when authorization header fails to authenticate',async () => {
+      const headers = {authorization: 'Bearer foo'}
+      const result = await axios.post(buildUrl('/'), {}, {headers})
+        .catch(error => error)
+      expect(result.response.status).toEqual(500)
+      expect(result.response.data.message).toEqual('Failed to authenticate.')
     })
   })
 })
