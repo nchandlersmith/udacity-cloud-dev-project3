@@ -29,6 +29,24 @@ describe('feed router', () => {
     sequelize.close()
   })
 
+  const findAllWithCaption = async (caption: string): Promise<FeedItem[]> =>  {
+    return await FeedItem.findAll({
+      where: {
+        caption
+      }
+    });
+  }
+
+  const teardownFeedItem = async (): Promise<void> => {
+    await FeedItem.destroy({
+      where: {
+        id: {
+          [Op.gt]: 1
+        }
+      }
+    })
+  }
+
   describe('get /',() => {
     it('should return all feed items', async () => {
       const result = await axios.get(buildUrl('/'))
@@ -153,18 +171,17 @@ describe('feed router', () => {
       const initialNumberOfItems = await FeedItem.count()
 
       const result = await axios.post(buildUrl('/'), requestBody, {headers})
+
       const finalNumberOfItems = await FeedItem.count()
-      await FeedItem.destroy({
-        where: {
-          id: {
-            [Op.gt]: 1
-          }
-        }
-      })
+      const itemsWithCaption = await findAllWithCaption(caption)
+      await teardownFeedItem();
       expect(result.status).toEqual(201)
       expect(result.data.caption).toEqual(caption)
       expect(result.data.url).toContain('https://udagram-707863247739-dev.s3.amazonaws.com/https%3A//happy.com')
       expect(finalNumberOfItems).toEqual(initialNumberOfItems + 1)
+      expect(itemsWithCaption.length).toEqual(1)
+      expect(itemsWithCaption[0].caption).toEqual(caption)
+      expect(itemsWithCaption[0].url).toEqual(url)
     })
   })
 })
