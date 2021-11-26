@@ -1,8 +1,22 @@
 import axios from 'axios'
+import {FeedItem} from "../models/FeedItem";
+import {Sequelize} from "sequelize-typescript";
+import {config} from "../../../../config/config";
+import {Op} from "sequelize";
 
 describe('feed router', () => {
   const host = 'http://localhost:8082'
   const feedPath = '/api/v0/feed'
+  const sequelize = new Sequelize({
+    'username': config.username,
+    'password': config.password,
+    'database': config.database,
+    'host': config.host,
+    'dialect': config.dialect,
+    'storage': ':memory:',
+  });
+  sequelize.addModels([FeedItem])
+
   const buildUrl = (endpoint: string): string => {
     return `${host}${feedPath}${endpoint}`
   }
@@ -103,6 +117,46 @@ describe('feed router', () => {
         .catch(error => error)
       expect(result.response.status).toEqual(500)
       expect(result.response.data.message).toEqual('Failed to authenticate.')
+    })
+
+    it('should return bad request when caption missing',async () => {
+      const headers = {authorization: `Bearer ${process.env.JWT_TEST_TOKEN}`}
+      const requestBody = {fileName: 'happy.png'}
+      const result = await axios.post(buildUrl('/'), requestBody, {headers})
+        .catch(error => error)
+      expect(result.response.status).toEqual(400)
+      expect(result.response.data.message).toEqual('Caption is required or malformed.')
+    })
+
+    it('should return bad request when file name is missing',async () => {
+      const headers = {authorization: `Bearer ${process.env.JWT_TEST_TOKEN}`}
+      const requestBody = {caption: 'I\'m so happy!'}
+      const result = await axios.post(buildUrl('/'), requestBody, {headers})
+        .catch(error => error)
+      expect(result.response.status).toEqual(400)
+      expect(result.response.data.message).toEqual('File url is required.')
+    })
+
+    it('should add item to feed and return it',async () => {
+      const headers = {authorization: `Bearer ${process.env.JWT_TEST_TOKEN}`}
+      const caption = 'I\'m so happy!'
+      const url = 'https://happy.com'
+      const requestBody = {caption, url}
+      const initialNumberOfItems = await FeedItem.count()
+
+      const result = await axios.post(buildUrl('/'), requestBody, {headers})
+      const finalNumberOfItems = await FeedItem.count()
+      FeedItem.destroy({
+        where: {
+          id: {
+            [Op.gt]: 1
+          }
+        }
+      })
+      expect(result.status).toEqual(201)
+      expect(result.data.caption).toEqual(caption)
+      expect(result.data.url).toContain('https://udagram-707863247739-dev.s3.amazonaws.com/https%3A//happy.com')
+      expect(finalNumberOfItems).toEqual(initialNumberOfItems + 1)
     })
   })
 })
