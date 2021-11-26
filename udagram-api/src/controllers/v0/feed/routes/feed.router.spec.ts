@@ -7,19 +7,27 @@ import {Op} from "sequelize";
 describe('feed router', () => {
   const host = 'http://localhost:8082'
   const feedPath = '/api/v0/feed'
-  const sequelize = new Sequelize({
-    'username': config.username,
-    'password': config.password,
-    'database': config.database,
-    'host': config.host,
-    'dialect': config.dialect,
-    'storage': ':memory:',
-  });
-  sequelize.addModels([FeedItem])
+  let sequelize: Sequelize
 
   const buildUrl = (endpoint: string): string => {
     return `${host}${feedPath}${endpoint}`
   }
+  beforeAll(() => {
+    sequelize = new Sequelize({
+      'username': config.username,
+      'password': config.password,
+      'database': config.database,
+      'host': config.host,
+      'dialect': config.dialect,
+      'storage': ':memory:',
+      'logging': false
+    });
+    sequelize.addModels([FeedItem])
+  })
+
+  afterAll(() => {
+    sequelize.close()
+  })
 
   describe('get /',() => {
     it('should return all feed items', async () => {
@@ -146,7 +154,7 @@ describe('feed router', () => {
 
       const result = await axios.post(buildUrl('/'), requestBody, {headers})
       const finalNumberOfItems = await FeedItem.count()
-      FeedItem.destroy({
+      await FeedItem.destroy({
         where: {
           id: {
             [Op.gt]: 1
