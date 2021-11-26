@@ -103,6 +103,7 @@ describe('feed router', () => {
         .catch(error => error)
       expect(result.response.status).toEqual(500)
       expect(result.response.data.message).toEqual('Failed to authenticate.')
+      expect(result.response.data.auth).toEqual(false)
     })
 
     it('should return signed url to file',async () => {
