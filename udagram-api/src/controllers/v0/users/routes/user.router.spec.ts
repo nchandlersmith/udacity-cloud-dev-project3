@@ -1,5 +1,10 @@
 import axios from "axios";
 import {Sequelize} from "sequelize-typescript";
+import {toBeNotEmptyString} from "../../../../test-utils/ExpectExtensions";
+
+expect.extend({
+  toBeNotEmptyString
+})
 
 describe('users router', () => {
   const host = 'http://localhost:8082'
@@ -17,14 +22,11 @@ describe('users router', () => {
       // TODO: should probably use test account injected in setup
       const result = await axios.get(buildUrl('/hello@gmail.com'))
       expect(result.status).toEqual(200)
-      expect(result.data.createdAt).not.toBeNull()
-      expect(result.data.createdAt).not.toEqual('')
-      expect(result.data.createdAt).not.toEqual('')
+      expect(result.data.createdAt).toBeNotEmptyString()
       expect(result.data.email).toEqual('hello@gmail.com')
       expect(result.data.passwordHash).not.toBeNull()
       expect(result.data.passwordHash).not.toEqual('')
-      expect(result.data.updatedAt).not.toBeNull()
-      expect(result.data.updatedAt).not.toEqual('')
+      expect(result.data.updatedAt).toBeNotEmptyString()
     })
   })
 })
