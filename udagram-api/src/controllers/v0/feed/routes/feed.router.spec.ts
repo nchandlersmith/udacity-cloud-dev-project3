@@ -40,5 +40,14 @@ describe('feed router', () => {
       expect(result.response.status).toEqual(401)
       expect(result.response.data.message).toEqual('No authorization headers.')
     })
+
+    it('should return unauthorized when authorization headers are null',async () => {
+      // @ts-ignore
+      const headers = {authorization: null}
+      const result = await axios.get(buildUrl('/signed-url/test.jpg'))
+        .catch(error => error)
+      expect(result.response.status).toEqual(401)
+      expect(result.response.data.message).toEqual('No authorization headers.')
+    })
   })
 })
