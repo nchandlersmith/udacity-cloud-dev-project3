@@ -148,8 +148,10 @@ describe('feed router', () => {
     it('should return bad request when caption missing',async () => {
       const headers = {authorization: `Bearer ${process.env.JWT_TEST_TOKEN}`}
       const requestBody = {fileName: 'happy.png'}
+
       const result = await axios.post(buildUrl('/'), requestBody, {headers})
         .catch(error => error)
+
       expect(result.response.status).toEqual(400)
       expect(result.response.data.message).toEqual('Caption is required or malformed.')
     })
@@ -157,8 +159,10 @@ describe('feed router', () => {
     it('should return bad request when file name is missing',async () => {
       const headers = {authorization: `Bearer ${process.env.JWT_TEST_TOKEN}`}
       const requestBody = {caption: 'I\'m so happy!'}
+
       const result = await axios.post(buildUrl('/'), requestBody, {headers})
         .catch(error => error)
+
       expect(result.response.status).toEqual(400)
       expect(result.response.data.message).toEqual('File url is required.')
     })
