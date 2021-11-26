@@ -64,5 +64,12 @@ describe('feed router', () => {
       expect(result.response.status).toEqual(500)
       expect(result.response.data.message).toEqual('Failed to authenticate.')
     })
+
+    it('should return signed url to file',async () => {
+      const headers = {authorization: `Bearer ${process.env.JWT_TEST_TOKEN}`}
+      const result = await axios.get(buildUrl('/signed-url/test.jpg'), {headers})
+      expect(result.status).toEqual(201)
+      expect(result.data.url).toContain('https://udagram-707863247739-dev.s3.amazonaws.com/test.jpg')
+    })
   })
 })
