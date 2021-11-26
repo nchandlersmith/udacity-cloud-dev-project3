@@ -7,6 +7,7 @@ const router: Router = Router();
 
 router.use('/auth', AuthRouter);
 
+// TODO: what is this?
 router.get('/');
 
 router.get('/:id', async (req: Request, res: Response) => {
