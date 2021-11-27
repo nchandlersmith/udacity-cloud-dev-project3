@@ -111,7 +111,7 @@ describe('feed router', () => {
     })
 
     it('should return signed url to file',async () => {
-      const headers = {authorization: `Bearer ${process.env.JWT_TEST_TOKEN}`}
+      const headers = {authorization: `Bearer ${testConfig.token}`}
       const result = await axios.get(buildUrl('/signed-url/test.jpg'), {headers})
       expect(result.status).toEqual(201)
       expect(result.data.url).toContain('https://udagram-707863247739-dev.s3.amazonaws.com/test.jpg')
@@ -152,7 +152,7 @@ describe('feed router', () => {
     })
 
     it('should return bad request when caption missing',async () => {
-      const headers = {authorization: `Bearer ${process.env.JWT_TEST_TOKEN}`}
+      const headers = {authorization: `Bearer ${testConfig.token}`}
       const requestBody = {fileName: 'happy.png'}
 
       const result = await axios.post(buildUrl('/'), requestBody, {headers})
@@ -163,7 +163,7 @@ describe('feed router', () => {
     })
 
     it('should return bad request when file name is missing',async () => {
-      const headers = {authorization: `Bearer ${process.env.JWT_TEST_TOKEN}`}
+      const headers = {authorization: `Bearer ${testConfig.token}`}
       const requestBody = {caption: 'I\'m so happy!'}
 
       const result = await axios.post(buildUrl('/'), requestBody, {headers})
@@ -174,7 +174,7 @@ describe('feed router', () => {
     })
 
     it('should add item to feed and return it',async () => {
-      const headers = {authorization: `Bearer ${process.env.JWT_TEST_TOKEN}`}
+      const headers = {authorization: `Bearer ${testConfig.token}`}
       const caption = 'I\'m so happy!'
       const url = 'https://happy.com'
       const requestBody = {caption, url}
