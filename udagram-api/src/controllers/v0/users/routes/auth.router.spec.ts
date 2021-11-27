@@ -38,5 +38,13 @@ describe('auth router', () => {
       expect(result.response.data.message).toEqual('Failed to authenticate.')
       expect(result.response.data.auth).toEqual(false)
     })
+
+    it('should verify authentication', async () => {
+      const headers = {authorization: `Bearer ${testConfig.token}`}
+      const result = await axios.get(buildUrl('/verification'), {headers})
+      expect(result.status).toEqual(200)
+      expect(result.data.message).toEqual('Authenticated.')
+      expect(result.data.auth).toEqual(true)
+    })
   })
 })
