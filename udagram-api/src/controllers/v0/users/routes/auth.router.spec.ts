@@ -1,6 +1,9 @@
 import axios from "axios";
 import {testConfig} from "../../../../test-utils/TestConfig";
 import {toBeNotEmptyString} from "../../../../test-utils/ExpectExtensions";
+import {Sequelize} from "sequelize-typescript";
+import {config} from "../../../../config/config";
+import {User} from "../models/User";
 
 expect.extend({
   toBeNotEmptyString
@@ -10,6 +13,32 @@ describe('auth router', () => {
   const host = `${testConfig.host}:${testConfig.port}`
   const authRoute = '/api/v0/users/auth'
   const buildUrl = (endpoint: string) => `${host}${authRoute}${endpoint}`
+  let sequelize: Sequelize
+
+  beforeAll(() => {
+    sequelize = new Sequelize({
+      'username': config.username,
+      'password': config.password,
+      'database': config.database,
+      'host': config.host,
+      'dialect': config.dialect,
+      'storage': ':memory:',
+      'logging': false
+    });
+    sequelize.addModels([User])
+  })
+
+  afterAll(() => {
+    sequelize.close()
+  })
+
+  async function deleteTestUser(email: string): Promise<any> {
+    await User.destroy({
+      where: {
+        email
+      }
+    })
+  }
 
   describe('get /verification', () => {
     const verificationEndpoint = '/verification';
@@ -106,6 +135,52 @@ describe('auth router', () => {
       expect(result.data.auth).toBeTruthy()
       expect(result.data.token).toBeNotEmptyString()
       expect(result.data.user.email).toBeNotEmptyString()
+    })
+  })
+
+  describe('post /', () => {
+    const addUserEndpoint = '/'
+    const email = 'test@example.com'
+    const password = 'my1P455w0rd15Gr347'
+
+    it('should require email', async () => {
+      const result = await axios.post(buildUrl(addUserEndpoint), {password})
+        .catch(error => error)
+      expect(result.response.status).toEqual(400)
+      expect(result.response.data.auth).toBeFalsy()
+      expect(result.response.data.message).toEqual('Email is missing or malformed.')
+    })
+
+    it('should validate email', async () => {
+      const result = await axios.post(buildUrl(addUserEndpoint), {eamil: 'borked', password})
+        .catch(error => error)
+      expect(result.response.status).toEqual(400)
+      expect(result.response.data.auth).toBeFalsy()
+      expect(result.response.data.message).toEqual('Email is missing or malformed.')
+    })
+
+    it('should require password', async () => {
+      const result = await axios.post(buildUrl(addUserEndpoint), {email})
+        .catch(error => error)
+      expect(result.response.status).toEqual(400)
+      expect(result.response.data.auth).toBeFalsy()
+      expect(result.response.data.message).toEqual('Password is required.')
+    })
+
+    it('should verify new user does not already exist', async () => {
+      const result = await axios.post(buildUrl(addUserEndpoint), {email: 'hello@gmail.com', password})
+        .catch(error => error)
+      expect(result.response.status).toEqual(422)
+      expect(result.response.data.auth).toBeFalsy()
+      expect(result.response.data.message).toEqual('User already exists.')
+    })
+
+    it('should add new user', async () => {
+      const result = await axios.post(buildUrl(addUserEndpoint), {email, password})
+      expect(result.status).toEqual(201)
+      expect(result.data.token).toBeNotEmptyString()
+      expect(result.data.user.email).toEqual(email)
+      await deleteTestUser(email);
     })
   })
 })
