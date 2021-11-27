@@ -8,7 +8,6 @@ import * as jwt from 'jsonwebtoken';
 import {NextFunction} from 'connect';
 
 import * as EmailValidator from 'email-validator';
-import {config} from 'bluebird';
 
 const router: Router = Router();
 
