@@ -1,19 +1,16 @@
 import axios from "axios";
-import {Sequelize} from "sequelize-typescript";
 import {toBeNotEmptyString} from "../../../../test-utils/ExpectExtensions";
+import {testConfig} from "../../../../test-utils/TestConfig";
 
 expect.extend({
   toBeNotEmptyString
 })
 
 describe('users router', () => {
-  const host = 'http://localhost:8082'
-  const usersPath = '/api/v0/users'
-  let sequelize: Sequelize
+  const host = `${testConfig.host}:${testConfig.port}`
+  const usersRoute = '/api/v0/users'
+  const buildUrl = (endpoint: string) => `${host}${usersRoute}${endpoint}`
 
-  const buildUrl = (endpoint: string): string => {
-    return `${host}${usersPath}${endpoint}`
-  }
   describe(' get /:id', () => {
     // TODO: should handle out of range errors
     // TODO: return valid JSON

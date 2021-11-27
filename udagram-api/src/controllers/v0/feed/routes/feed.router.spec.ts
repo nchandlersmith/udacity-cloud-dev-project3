@@ -4,19 +4,18 @@ import {Sequelize} from "sequelize-typescript";
 import {config} from "../../../../config/config";
 import {Op} from "sequelize";
 import {toBeNotEmptyString} from "../../../../test-utils/ExpectExtensions";
+import {testConfig} from "../../../../test-utils/TestConfig";
 
 expect.extend({
   toBeNotEmptyString
 })
 
 describe('feed router', () => {
-  const host = 'http://localhost:8082'
-  const feedPath = '/api/v0/feed'
+  const host = `${testConfig.host}:${testConfig.port}`
+  const feedRoute = '/api/v0/feed'
+  const buildUrl = (endpoint: string) => `${host}${feedRoute}${endpoint}`
   let sequelize: Sequelize
 
-  const buildUrl = (endpoint: string): string => {
-    return `${host}${feedPath}${endpoint}`
-  }
   beforeAll(() => {
     sequelize = new Sequelize({
       'username': config.username,
